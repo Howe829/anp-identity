@@ -36,7 +36,6 @@ fn identity_transition_shared_resolver_contract_precedes_local_session() {
         case["requestedDid"].as_str().unwrap(),
         &fetch,
         &trusted,
-        None,
         &mut cache,
         case["maxHops"].as_u64().unwrap() as usize,
     )
@@ -297,7 +296,7 @@ fn transition_public_values_serialize_without_private_material() {
 }
 
 #[test]
-fn identity_transition_preserves_recovery_provider_and_unverified_assurance() {
+fn identity_transition_preserves_recovery_and_local_unsigned_hop_assurance() {
     let recovery_key = SigningKey::from_bytes(&[0x31; 32]);
     let recovery_root = tempfile::tempdir().unwrap();
     let mut recovery_manager =
@@ -385,7 +384,7 @@ fn identity_transition_preserves_recovery_provider_and_unverified_assurance() {
         provider_manager
             .prepare_identity_transition(provider_request)
             .unwrap(),
-        "provider_asserted",
+        "unverified",
     );
 
     let unverified_root = tempfile::tempdir().unwrap();

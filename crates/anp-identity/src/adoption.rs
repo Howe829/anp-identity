@@ -629,7 +629,15 @@ impl DidIdentity {
         record.checkpoint = Some(checkpoint(&spec.evidence));
         record.initial_publication_pending = false;
         record.revision = spec.evidence.document_version;
-        persist_state_transition(self, &guard, &mut record)?;
+        if sibling_only {
+            // Sibling convergence cannot change the registry summary. Persist
+            // only the identity revision under its generation CAS, just like
+            // a document update, so a live manager retains its registry view.
+            record.generation = record.generation.checked_add(1).ok_or(DidError::Conflict)?;
+            write_identity(self.runtime().root(), &guard, &record)?;
+        } else {
+            persist_state_transition(self, &guard, &mut record)?;
+        }
         drop(guard);
         self.replace_record(record);
         Ok(outcome)
